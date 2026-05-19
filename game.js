@@ -374,6 +374,8 @@ function render() {
       const el = cellEl(r,c); if (el) el.classList.add('win-cell');
     }
   }
+  renderAnnotations();
+  updatePriorityLegend();
 }
 
 // ═══════════════════════════════════════════════════════════════════════════════
@@ -459,7 +461,7 @@ function animateDrop(col, row, player, cb) {
 // ═══════════════════════════════════════════════════════════════════════════════
 
 function handleHumanMove(col) {
-  if (gameOver || isAnimating || currentPlayer !== RED) return;
+  if (lessonStep >= 0 || gameOver || isAnimating || currentPlayer !== RED) return;
   if (!canPlay(board, col)) return;
 
   clearHintFlash();
@@ -590,6 +592,186 @@ $('btn-hint').addEventListener('click', () => {
     colEl.classList.remove('hint-flash');
     hintTimer = null;
   }, 1500);
+});
+
+// ═══════════════════════════════════════════════════════════════════════════════
+//  SSD OVERLAY  — annotate empty cells with WeakC4 symbols
+// ═══════════════════════════════════════════════════════════════════════════════
+
+let ssdActive = false;
+
+function cellAnn(b, r, c) {
+  if (b[r][c] !== EMPTY) return null;
+  let pos = 0, total = 0;
+  for (let row = 0; row < ROWS; row++) {
+    if (b[row][c] === EMPTY) { total++; if (row === r) pos = total; }
+  }
+  // pos 1 = bottom-most empty (playable next)
+  if (pos === 1) {
+    const nb1 = placed(b, c, RED);    if (nb1 && checkWin(nb1)) return 'win';
+    const nb2 = placed(b, c, YELLOW); if (nb2 && checkWin(nb2)) return 'block';
+  }
+  if (pos % 2 === 0)                     return 'claimeven'; // Red's via claimeven
+  if (pos === total && total % 2 === 1)  return 'claimodd';  // Red's via claimodd
+  return null; // Yellow's cell in this column — no annotation
+}
+
+const ANN_SYM = { win: '!', block: '!', claimodd: '|', claimeven: '○' };
+
+function renderAnnotations() {
+  document.querySelectorAll('.ann').forEach(el => el.remove());
+  if (!ssdActive) return;
+  for (let r = 0; r < ROWS; r++) {
+    for (let c = 0; c < COLS; c++) {
+      const ann = cellAnn(board, r, c);
+      if (!ann) continue;
+      const el = cellEl(r, c); if (!el) continue;
+      const div = document.createElement('div');
+      div.className = `ann ann-${ann}`;
+      div.textContent = ANN_SYM[ann] || '';
+      el.appendChild(div);
+    }
+  }
+}
+
+function priorityNow(b) {
+  for (let c = 0; c < COLS; c++) {
+    if (!canPlay(b, c)) continue;
+    if (checkWin(placed(b, c, RED)))    return 'win';
+  }
+  for (let c = 0; c < COLS; c++) {
+    if (!canPlay(b, c)) continue;
+    if (checkWin(placed(b, c, YELLOW))) return 'block';
+  }
+  if (suggestion?.urgent) return 'urgent';
+  for (let r = 0; r < ROWS; r++)
+    for (let c = 0; c < COLS; c++) {
+      const a = cellAnn(b, r, c);
+      if (a === 'claimodd' || a === 'claimeven') return 'claim';
+    }
+  return 'equal';
+}
+
+function updatePriorityLegend() {
+  if ($('priority-panel').hidden) return;
+  const active = (gameOver || currentPlayer !== RED) ? null : priorityNow(board);
+  document.querySelectorAll('.p-step').forEach(li =>
+    li.classList.toggle('p-active', li.dataset.step === active));
+}
+
+// ═══════════════════════════════════════════════════════════════════════════════
+//  CLAIMEVEN LESSON
+// ═══════════════════════════════════════════════════════════════════════════════
+
+const LESSON_DATA = [
+  { col: 3, player: RED,
+    text: "Red opens at the center (column 4). Column 4 now has 5 empty squares — ODD. All other columns have 6 — EVEN. Blue ○ marks cells Red can claim; the blue | marks Red's Claimodd cell at the very top of col 4." },
+  { col: 2, player: YELLOW,
+    text: "Yellow plays column 3 (6 empties — even). The annotations shift as one cell is filled. Notice how Red is about to mirror." },
+  { col: 2, player: RED,
+    text: "Red MIRRORS column 3 immediately. Red lands on position 2 from the bottom — an EVEN slot (○). That cell is now guaranteed for Red. Rule: wherever Yellow plays in an even column, Red follows in the same column." },
+  { col: 4, player: YELLOW,
+    text: "Yellow plays column 5." },
+  { col: 4, player: RED,
+    text: "Red mirrors column 5. Another even cell secured without any calculation." },
+  { col: 1, player: YELLOW,
+    text: "Yellow plays column 2." },
+  { col: 1, player: RED,
+    text: "Red mirrors column 2. Three pairs done. Red's guaranteed cells are quietly building multiple 4-in-a-row threats." },
+  { col: 5, player: YELLOW,
+    text: "Yellow plays column 6." },
+  { col: 5, player: RED,
+    text: "Red mirrors column 6. Red has claimed even cells in four columns. Yellow cannot block all the resulting threats simultaneously. Red wins — by following one simple rule." },
+];
+
+const LESSON_INTRO = "The Claimeven strategy lets Red win without any calculation. When a column has an EVEN number of empty squares, Red can guarantee the even-numbered cells (2nd, 4th, 6th from bottom) simply by mirroring Yellow's move in that column. The ○ symbols show cells Red owns; | shows Red's Claimodd cell. Step through to see it unfold.";
+
+let lessonStep = -1, lessonBoards = null, lessonSaved = null;
+
+function buildLessonBoards() {
+  const boards = [makeBoard()];
+  let b = makeBoard();
+  for (const { col, player } of LESSON_DATA) {
+    b = placed(b, col, player);
+    boards.push(b);
+  }
+  return boards;
+}
+
+function openLesson() {
+  if (aiTimer) { clearTimeout(aiTimer); aiTimer = null; }
+  clearHintFlash();
+  lessonSaved = { board, history, currentPlayer, gameOver, winner, winCells, suggestion, ssdActive };
+  lessonBoards = buildLessonBoards();
+  lessonStep = 0;
+  ssdActive = true;
+  gameOver = false; currentPlayer = RED;
+  $('status-row').hidden = true;
+  $('msg').hidden        = true;
+  $('btns').hidden       = true;
+  $('btn-lesson').hidden = true;
+  $('lesson-ui').hidden  = false;
+  $('priority-panel').hidden = false;
+  updateLessonStep();
+}
+
+function closeLesson() {
+  board         = lessonSaved.board;
+  history       = lessonSaved.history;
+  currentPlayer = lessonSaved.currentPlayer;
+  gameOver      = lessonSaved.gameOver;
+  winner        = lessonSaved.winner;
+  winCells      = lessonSaved.winCells;
+  suggestion    = lessonSaved.suggestion;
+  ssdActive     = lessonSaved.ssdActive;
+  lessonStep    = -1;
+  $('status-row').hidden = false;
+  $('msg').hidden        = false;
+  $('btns').hidden       = false;
+  $('btn-lesson').hidden = false;
+  $('lesson-ui').hidden  = true;
+  $('priority-panel').hidden = !ssdActive;
+  $('btn-ssd').textContent   = `SSD: ${ssdActive ? 'ON' : 'OFF'}`;
+  $('btn-ssd').classList.toggle('active', ssdActive);
+  document.querySelectorAll('.col-num').forEach(el => el.classList.remove('col-num-active'));
+  render(); updateStatus();
+}
+
+function updateLessonStep() {
+  board = lessonBoards[lessonStep];
+
+  $('lesson-text-box').textContent =
+    lessonStep === 0 ? LESSON_INTRO : LESSON_DATA[lessonStep - 1].text;
+  $('lesson-counter').textContent =
+    lessonStep === 0 ? 'Introduction' : `Step ${lessonStep} of ${LESSON_DATA.length}`;
+
+  $('lesson-prev').disabled = lessonStep === 0;
+  const isLast = lessonStep === LESSON_DATA.length;
+  $('lesson-next').textContent = isLast ? 'Done ✓' : 'Next →';
+
+  const hCol = lessonStep > 0 ? LESSON_DATA[lessonStep - 1].col : null;
+  document.querySelectorAll('.col-num').forEach((el, i) =>
+    el.classList.toggle('col-num-active', i === hCol));
+
+  render();
+}
+
+$('btn-ssd').addEventListener('click', () => {
+  ssdActive = !ssdActive;
+  $('btn-ssd').textContent = `SSD: ${ssdActive ? 'ON' : 'OFF'}`;
+  $('btn-ssd').classList.toggle('active', ssdActive);
+  $('priority-panel').hidden = !ssdActive;
+  renderAnnotations(); updatePriorityLegend();
+});
+
+$('btn-lesson').addEventListener('click', openLesson);
+$('lesson-close').addEventListener('click', closeLesson);
+$('lesson-prev').addEventListener('click', () => {
+  if (lessonStep > 0) { lessonStep--; updateLessonStep(); }
+});
+$('lesson-next').addEventListener('click', () => {
+  if (lessonStep < LESSON_DATA.length) { lessonStep++; updateLessonStep(); }
+  else closeLesson();
 });
 
 // ═══════════════════════════════════════════════════════════════════════════════

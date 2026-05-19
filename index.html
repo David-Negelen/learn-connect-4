@@ -32,7 +32,40 @@
     <div id="btns">
       <button id="btn-new">New Game</button>
       <button id="btn-hint">Flash Hint</button>
+      <button id="btn-ssd">SSD: OFF</button>
     </div>
+
+    <button id="btn-lesson">Learn Claimeven →</button>
+
+    <!-- Priority legend — shown when SSD is active -->
+    <div id="priority-panel" hidden>
+      <div class="p-title">Red's Priority Order <span class="p-hint">(step 1 is most urgent)</span></div>
+      <ol id="priority-list">
+        <li class="p-step" data-step="win">   <span class="p-sym p-urgent">!</span> Win immediately</li>
+        <li class="p-step" data-step="block"> <span class="p-sym p-urgent">!</span> Block Yellow's win</li>
+        <li class="p-step" data-step="urgent"><span class="p-sym p-urgent">!</span> Tactical threat</li>
+        <li class="p-step" data-step="miai">  <span class="p-sym p-miai">@</span> Miai pair</li>
+        <li class="p-step" data-step="claim"> <span class="p-sym p-claimodd">|</span> · <span class="p-sym p-claimeven">○</span> Claimodd / Claimeven</li>
+        <li class="p-step" data-step="plus">  <span class="p-sym p-plus">+</span> Positive</li>
+        <li class="p-step" data-step="equal"> <span class="p-sym p-equal">=</span> Neutral</li>
+        <li class="p-step" data-step="minus"> <span class="p-sym p-minus">−</span> Last resort</li>
+      </ol>
+    </div>
+
+    <!-- Lesson UI — shown in lesson mode, replaces normal controls -->
+    <div id="lesson-ui" hidden>
+      <div class="lesson-top-row">
+        <span class="lesson-title">Claimeven — Interactive Lesson</span>
+        <button id="lesson-close">✕ Exit</button>
+      </div>
+      <p id="lesson-text-box"></p>
+      <div id="lesson-nav">
+        <button id="lesson-prev" disabled>← Back</button>
+        <span id="lesson-counter"></span>
+        <button id="lesson-next">Next →</button>
+      </div>
+    </div>
+
   </div><!-- #app -->
 
   <script src="game.js"></script>
