@@ -13,6 +13,14 @@
       <div id="var-name">Very Beginning</div>
     </header>
 
+    <nav id="tab-bar">
+      <button class="tab-btn tab-active" data-tab="game">Game</button>
+      <button class="tab-btn" data-tab="trainer">Trainer</button>
+      <button class="tab-btn" data-tab="concepts">Concepts</button>
+    </nav>
+
+    <div id="tab-game" class="tab-pane">
+
     <div id="status-row">
       <div id="turn-row">
         <div class="pip red" id="pip"></div>
@@ -65,6 +73,12 @@
         <button id="lesson-next">Next →</button>
       </div>
     </div>
+
+    </div><!-- #tab-game -->
+
+    <div id="tab-trainer" class="tab-pane" hidden></div>
+
+    <div id="tab-concepts" class="tab-pane" hidden></div>
 
   </div><!-- #app -->
 

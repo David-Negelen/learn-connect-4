@@ -595,6 +595,412 @@ $('btn-hint').addEventListener('click', () => {
 });
 
 // ═══════════════════════════════════════════════════════════════════════════════
+//  TAB SWITCHING
+// ═══════════════════════════════════════════════════════════════════════════════
+
+function switchTab(tab) {
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.toggle('tab-active', b.dataset.tab === tab));
+  document.querySelectorAll('.tab-pane').forEach(p => { p.hidden = p.id !== `tab-${tab}`; });
+  if (tab === 'trainer') refreshTrainerSummary();
+}
+document.querySelectorAll('.tab-btn').forEach(btn =>
+  btn.addEventListener('click', () => switchTab(btn.dataset.tab)));
+
+// ═══════════════════════════════════════════════════════════════════════════════
+//  PROGRESS STORAGE
+// ═══════════════════════════════════════════════════════════════════════════════
+
+function loadProgress() {
+  try { return JSON.parse(localStorage.getItem('wc4-progress') || '{}'); } catch { return {}; }
+}
+function saveProgress(data) { localStorage.setItem('wc4-progress', JSON.stringify(data)); }
+function recordResult(hist, correct) {
+  const p = loadProgress();
+  if (!p[hist]) p[hist] = { a: 0, c: 0 };
+  p[hist].a++; if (correct) p[hist].c++;
+  saveProgress(p);
+}
+function getAccuracy(hist) {
+  const p = loadProgress()[hist];
+  return p && p.a >= 1 ? Math.round(p.c / p.a * 100) : null;
+}
+
+// ═══════════════════════════════════════════════════════════════════════════════
+//  MEMORIZATION TRAINER
+// ═══════════════════════════════════════════════════════════════════════════════
+
+// All even-length BOOK keys are Red's turn — those are our drill positions.
+const DRILL_POSITIONS = Object.entries(BOOK)
+  .filter(([hist]) => hist.length % 2 === 0)
+  .map(([hist, [col, name]]) => ({ hist, col: col - 1, name })) // 0-indexed col
+  .sort((a, b) => a.hist.length - b.hist.length); // shorter (earlier) positions first
+
+const MOVE_REASONS = {
+  '':           "The center column connects to more potential 4-in-a-rows than any other — a core principle of Connect 4 strategy.",
+  '44':         "Reinforcing the center builds maximum threat density and defines the Crown Variations main line.",
+  '43':         "Column 6 prevents Yellow from getting symmetric control and launches the 436 structure.",
+  '46':         "Column 2 mirrors the 436 response on the other side — entering the 462 / Cup Opening lines.",
+  '45':         "Column 2 takes center-adjacent control and initiates the Hills Opening.",
+  '47':         "Staying in column 4 maintains center dominance in the 47 Lines.",
+  '41':         "Column 4 keeps the center despite Yellow's edge attempt in the Hills Opening.",
+  '42':         "Column 3 starts building toward a miai pair between center and left.",
+  '4444':       "A fourth center piece creates a tall crown structure with strong claimeven implications.",
+  '4443':       "Column 6 keeps Red's threat network alive while preventing Yellow's left-side expansion.",
+  '4442':       "Column 4 maintains center pressure in the D3-D4 Opening.",
+  '4441':       "Column 4 responds to Yellow's far-left play by deepening the center stack.",
+  '4445':       "Column 2 establishes a miai pair on either side of the central crown.",
+  '4446':       "Column 3 sets up the Hills Opening counter to Yellow's near-right play.",
+  '444444':     "Column 5 continues the Crown 6-1 line — the most forcing branch of the Crown.",
+  '444445':     "Column 2 launches the Shoulder Spike — an aggressive forcing sequence.",
+  '444442':     "Column 2 enters the Candlesticks — a deep positional line with strong claimeven control.",
+  '444446':     "Column 6 enters the Half Candlesticks, exploiting Yellow's column-6 commitment.",
+  '444443':     "Column 6 transposes into the 3-2 / Hills line — a dual-threat setup.",
+  '4363':       "Column 4 is the book move keeping Red's threat network intact in the 4363 Lines.",
+  '4621':       "Column 3 sets up the Cup Opening, targeting the miai pair on columns 2-4.",
+  '4524':       "Column 4 maintains the Hills Opening structure after Yellow's early column-5 play.",
+};
+
+function getMoveReason(hist, col) {
+  const r = MOVE_REASONS[hist];
+  if (r) return r;
+  const entry = BOOK[hist];
+  return entry
+    ? `Book move for the ${entry[1]} — memorizing this branch eliminates the need to calculate here.`
+    : 'This is the engine-recommended move for this position.';
+}
+
+function boardFromHistory(hist) {
+  let b = makeBoard();
+  for (let i = 0; i < hist.length; i++) {
+    const c = parseInt(hist[i]) - 1;
+    b = placed(b, c, i % 2 === 0 ? RED : YELLOW) || b;
+  }
+  return b;
+}
+
+// ── Drill board DOM ──────────────────────────────────────────────────────────
+
+function buildDrillBoard() {
+  const boardEl  = document.getElementById('drill-board');
+  const numsEl   = document.getElementById('drill-col-nums');
+  boardEl.innerHTML = ''; numsEl.innerHTML = '';
+  for (let c = 0; c < COLS; c++) {
+    const col = document.createElement('div');
+    col.className = 'dcol'; col.dataset.c = c;
+    for (let r = ROWS - 1; r >= 0; r--) {
+      const cell = document.createElement('div');
+      cell.className = 'dc'; cell.dataset.r = r; cell.dataset.c = c;
+      col.appendChild(cell);
+    }
+    boardEl.appendChild(col);
+    const n = document.createElement('div');
+    n.className = 'dcn'; n.textContent = c + 1; n.dataset.c = c;
+    numsEl.appendChild(n);
+  }
+}
+
+function renderDrillBoard(b) {
+  document.querySelectorAll('#drill-board .dc').forEach(el => {
+    const r = +el.dataset.r, c = +el.dataset.c;
+    el.className = 'dc';
+    if (b[r][c] === RED)    el.classList.add('red');
+    if (b[r][c] === YELLOW) el.classList.add('yellow');
+  });
+  // Clear column highlights
+  document.querySelectorAll('.dcol').forEach(el => el.className = 'dcol');
+  document.querySelectorAll('.dcn').forEach(el => el.className = 'dcn');
+}
+
+// ── Drill state ──────────────────────────────────────────────────────────────
+
+let drillQueue = [], drillIdx = 0, drillCorrect = 0, drillAnswered = false;
+
+function buildDrillQueue() {
+  const progress = loadProgress();
+  // Prioritise: unseen first, then by lowest accuracy, then shuffle within tiers
+  const shuffle = arr => { for (let i = arr.length - 1; i > 0; i--) { const j = Math.random() * (i+1) | 0; [arr[i], arr[j]] = [arr[j], arr[i]]; } return arr; };
+  const unseen   = shuffle(DRILL_POSITIONS.filter(p => !progress[p.hist]));
+  const needWork = shuffle(DRILL_POSITIONS.filter(p => { const d = progress[p.hist]; return d && d.a >= 1 && d.c/d.a < 0.8; }));
+  const mastered = shuffle(DRILL_POSITIONS.filter(p => { const d = progress[p.hist]; return d && d.a >= 1 && d.c/d.a >= 0.8; }));
+  return [...unseen, ...needWork, ...mastered].slice(0, 20); // cap at 20 per session
+}
+
+function startDrill() {
+  drillQueue = buildDrillQueue();
+  if (!drillQueue.length) return;
+  drillIdx = 0; drillCorrect = 0;
+  document.getElementById('trainer-summary').hidden = true;
+  document.getElementById('btn-start-drill').hidden = true;
+  document.getElementById('drill-wrap').hidden = false;
+  showDrillCard();
+}
+
+function showDrillCard() {
+  drillAnswered = false;
+  const pos = drillQueue[drillIdx];
+  const b   = boardFromHistory(pos.hist);
+
+  document.getElementById('drill-variation').textContent = pos.name;
+  document.getElementById('drill-question').textContent  = "What is Red's best move?";
+  document.getElementById('drill-feedback').hidden = true;
+  document.getElementById('drill-feedback').className   = 'drill-feedback';
+  document.getElementById('drill-progress-text').textContent =
+    `Card ${drillIdx + 1} of ${drillQueue.length} · Session: ${drillCorrect}/${drillIdx} correct`;
+
+  renderDrillBoard(b);
+}
+
+function submitDrillAnswer(col) {
+  if (drillAnswered) return;
+  drillAnswered = true;
+  const pos   = drillQueue[drillIdx];
+  const right = col === pos.col;
+  if (right) drillCorrect++;
+  recordResult(pos.hist, right);
+
+  // Visual feedback on columns
+  const colEls = document.querySelectorAll('.dcol');
+  colEls[col].classList.add(right ? 'drill-correct' : 'drill-wrong');
+  if (!right) {
+    colEls[pos.col].classList.add('drill-answer');
+    document.querySelectorAll('.dcn')[pos.col].classList.add('drill-answer-num');
+  }
+
+  const fb = document.getElementById('drill-feedback');
+  fb.hidden = false;
+  fb.className = right ? 'correct' : 'wrong';
+  if (right) {
+    fb.innerHTML = `<strong>✓ Correct</strong> — ${getMoveReason(pos.hist, pos.col)}`;
+  } else {
+    fb.innerHTML = `<strong>✗ Column ${pos.col + 1} was the book move</strong> — ${getMoveReason(pos.hist, pos.col)}`;
+  }
+
+  setTimeout(advanceDrill, 2400);
+}
+
+function advanceDrill() {
+  drillIdx++;
+  if (drillIdx >= drillQueue.length) { endDrill(); return; }
+  showDrillCard();
+}
+
+function endDrill() {
+  document.getElementById('drill-wrap').hidden = true;
+  const pct   = drillQueue.length ? Math.round(drillCorrect / drillQueue.length * 100) : 0;
+  const sumEl = document.getElementById('drill-summary');
+  const scoreEl = document.getElementById('drill-score');
+  scoreEl.textContent = `${pct}%`;
+  scoreEl.className = pct >= 80 ? 'good' : pct >= 50 ? 'ok' : 'bad';
+  document.getElementById('drill-summary-text').textContent =
+    `${drillCorrect} of ${drillQueue.length} correct · ${pct >= 80 ? 'Great session!' : pct >= 50 ? 'Keep practicing.' : 'Review the Concepts tab for the theory.'}`;
+  sumEl.hidden = false;
+  document.getElementById('btn-start-drill').hidden = false;
+  document.getElementById('btn-start-drill').textContent = 'Drill Again';
+  refreshTrainerSummary();
+}
+
+// ── Trainer summary view ─────────────────────────────────────────────────────
+
+function refreshTrainerSummary() {
+  const progress = loadProgress();
+  const total    = DRILL_POSITIONS.length;
+  let mastered = 0, needWork = 0;
+
+  const mList = [], pList = [], uList = [];
+  for (const pos of DRILL_POSITIONS) {
+    const d = progress[pos.hist];
+    const acc = d && d.a >= 3 ? d.c / d.a : null;
+    if (acc !== null && acc >= 0.8) { mastered++; mList.push({ pos, acc }); }
+    else if (d && d.a >= 1)         { needWork++;  pList.push({ pos, acc: d.c/d.a }); }
+    else                            { uList.push({ pos }); }
+  }
+
+  document.getElementById('coverage-fill').style.width = `${Math.round(mastered/total*100)}%`;
+  document.getElementById('coverage-pct').textContent  = `${Math.round(mastered/total*100)}%`;
+  document.getElementById('stat-mastered').textContent = mastered;
+  document.getElementById('stat-practice').textContent  = needWork;
+  document.getElementById('stat-unseen').textContent   = total - mastered - needWork;
+
+  const listEl = document.getElementById('pos-list');
+  listEl.innerHTML = '';
+  const addSection = (items, cls, label, accFn) => {
+    if (!items.length) return;
+    const sec = document.createElement('div');
+    sec.className = 'pos-list-section';
+    sec.innerHTML = `<div class="pos-list-title">${label}</div>`;
+    items.forEach(item => {
+      const acc = accFn(item);
+      const div = document.createElement('div');
+      div.className = 'pos-item';
+      div.innerHTML = `<span class="pos-dot ${cls}"></span>
+        <span>${item.pos.name}${item.pos.hist ? ` <span style="opacity:0.5;font-size:0.7em">(${item.pos.hist})</span>` : ''}</span>
+        ${acc !== null ? `<span class="pos-acc ${cls}">${Math.round(acc*100)}%</span>` : ''}`;
+      sec.appendChild(div);
+    });
+    listEl.appendChild(sec);
+  };
+  addSection(mList, 'mastered', '✓ Mastered', i => i.acc);
+  addSection(pList, 'practice', '⚡ Needs Practice', i => i.acc);
+  addSection(uList, 'unseen',   '○ Not Yet Seen',   () => null);
+}
+
+// ── Build trainer tab DOM (called once at init) ──────────────────────────────
+
+function buildTrainerTab() {
+  const tab = document.getElementById('tab-trainer');
+  tab.innerHTML = `
+    <div id="trainer-summary">
+      <div id="coverage-card">
+        <div class="coverage-row">
+          <span id="coverage-label">Opening Book Coverage</span>
+          <span id="coverage-pct">0%</span>
+        </div>
+        <div id="coverage-bar"><div id="coverage-fill"></div></div>
+        <div id="trainer-stats-row">
+          <div class="tstat tstat-mastered"><div id="stat-mastered" class="tstat-num">0</div><div class="tstat-label">Mastered</div></div>
+          <div class="tstat tstat-practice"> <div id="stat-practice"  class="tstat-num">0</div><div class="tstat-label">Practice</div></div>
+          <div class="tstat tstat-unseen">  <div id="stat-unseen"   class="tstat-num">0</div><div class="tstat-label">Unseen</div></div>
+        </div>
+      </div>
+      <div id="position-list-wrap"><div id="pos-list"></div></div>
+    </div>
+
+    <div id="drill-wrap" hidden>
+      <div id="drill-header">
+        <div id="drill-variation"></div>
+        <div id="drill-question"></div>
+      </div>
+      <div id="drill-board-outer">
+        <div id="drill-board"></div>
+      </div>
+      <div id="drill-col-nums"></div>
+      <div id="drill-feedback" hidden></div>
+      <div id="drill-footer">
+        <span id="drill-progress-text"></span>
+        <button id="btn-end-drill">End Session</button>
+      </div>
+    </div>
+
+    <div id="drill-summary" hidden>
+      <h3>Session Complete</h3>
+      <div id="drill-score">—</div>
+      <p id="drill-summary-text"></p>
+    </div>
+
+    <button id="btn-start-drill">Start Drilling</button>
+  `;
+
+  buildDrillBoard();
+  document.getElementById('drill-board').addEventListener('click', e => {
+    const c = e.target.closest('.dcol')?.dataset?.c;
+    if (c !== undefined) submitDrillAnswer(parseInt(c));
+  });
+  document.getElementById('btn-start-drill').addEventListener('click', startDrill);
+  document.getElementById('btn-end-drill').addEventListener('click', () => {
+    drillIdx = drillQueue.length; endDrill();
+  });
+  refreshTrainerSummary();
+}
+
+// ═══════════════════════════════════════════════════════════════════════════════
+//  CONCEPT DASHBOARD
+// ═══════════════════════════════════════════════════════════════════════════════
+
+function mc(cls) { return `<div class="mc ${cls}"></div>`; }
+const E = '', R = 'r', Y = 'y', CE = 'ce', CO = 'co', URG = 'urg', MI = 'mi';
+
+function miniGrid(rows, cols = 7) {
+  const cls = cols === 7 ? 'mg7' : cols === 5 ? 'mg5' : 'mg4';
+  return `<div class="mini-grid ${cls}">${rows.flatMap(r => r).map(c => mc(c)).join('')}</div>`;
+}
+
+const CONCEPTS = [
+  {
+    sym: '○', symColor: '#34d399', title: 'Claimeven',
+    desc: "When a column has an EVEN number of empty squares, Red can guarantee the 2nd, 4th, and 6th cells from the bottom — simply by responding to Yellow's every move in that same column. No calculation needed: wherever Yellow plays in an even column, Red follows immediately. Red gets the even cells; Yellow the odd ones.",
+    diagram: miniGrid([
+      [CE,CE,CE,CE,CE,CE,CE],
+      [E, E, E, E, E, E, E ],
+      [CE,CE,CE,CE,CE,CE,CE],
+      [E, E, E, E, E, E, E ],
+      [CE,CE,CE,CE,CE,CE,CE],
+      [E, E, E, E, E, E, E ],
+    ]),
+  },
+  {
+    sym: '@', symColor: '#a78bfa', title: 'Miai Pairs',
+    desc: "Two cells are miai if winning through either one guarantees Red eventually wins through the other too. Once Red creates threats through both miai cells, Yellow can only block one — Red scores through the remaining threat. Recognising miai pairs turns a two-step calculation into a single visual check.",
+    diagram: miniGrid([
+      [E, E, E, E, E ],
+      [E, E, E, E, E ],
+      [E, R, E, R, E ],
+      [MI,R, R, R, MI],
+    ], 5),
+  },
+  {
+    sym: '|', symColor: '#60a5fa', title: 'Claimodd',
+    desc: "In a column with an ODD number of empty squares, the topmost empty cell sits at an odd-numbered row. Red can claim this cell at the right moment — before Yellow controls it. Timing is key: Red waits until the column is almost full, then plays into it, capturing the odd cell that completes a winning threat.",
+    diagram: miniGrid([
+      [E, E, CO,E, E, E, E],
+      [E, E, CE,E, E, E, E],
+      [E, E, E, E, E, E, E],
+      [E, E, CE,E, E, E, E],
+      [E, E, E, E, E, E, E],
+      [E, E, R, E, E, E, E],
+    ]),
+  },
+  {
+    sym: '!', symColor: '#fb923c', title: 'Urgent Threats',
+    desc: "An urgent cell is one where Red must play immediately — either to win on this turn or to stop Yellow from winning next turn. Urgent threats override all other strategy. If you see a red ! on the overlay, every other annotation is irrelevant: play there first, no exceptions.",
+    diagram: miniGrid([
+      [E,   E,   E,   E,   E  ],
+      [E,   E,   E,   E,   E  ],
+      [E,   URG, E,   E,   E  ],
+      [R,   R,   R,   E,   Y  ],
+    ], 5),
+  },
+  {
+    sym: '⚡', symColor: '#fbbf24', title: 'Zugzwang',
+    desc: "Zugzwang (from chess) is when the player to move is forced into a losing action. In Connect 4, Red engineers positions where every remaining cell benefits Red's threats — so Yellow, forced to keep playing, fills Red's winning squares. Red wins not by acting, but by making Yellow act.",
+    diagram: miniGrid([
+      [E, E, E, E, E, E, E],
+      [Y, E, E, E, E, E, Y],
+      [R, Y, E, E, E, Y, R],
+      [R, R, Y, E, Y, R, R],
+      [Y, R, R, Y, R, R, Y],
+      [R, Y, Y, R, Y, Y, R],
+    ]),
+  },
+  {
+    sym: '⅄', symColor: '#94a3b8', title: 'Weak vs Strong Solution',
+    desc: "A strong solution maps every possible position — all 4.5 trillion of them. A weak solution only covers Red's winning replies; Yellow's choices don't matter because Red always wins with correct play. This means you need to memorise only ~40 book positions (the trunk), not an entire game tree. The engine handles all of Yellow's deviations; you handle the known lines.",
+    diagram: miniGrid([
+      [E, E, E, E, E, E, E],
+      [E, E, E, CE,E, E, E],
+      [E, E, CE,CE,CE,E, E],
+      [E, CE,CE,CE,CE,CE,E],
+      [CE,CE,CE,CE,CE,CE,CE],
+      [E, CE,CE,CE,CE,CE,E],
+    ]),
+  },
+];
+
+function buildConceptsTab() {
+  const tab = document.getElementById('tab-concepts');
+  tab.innerHTML = `<div id="concepts-grid">${
+    CONCEPTS.map(c => `
+      <div class="cc">
+        <div class="cc-header">
+          <span class="cc-sym" style="color:${c.symColor}">${c.sym}</span>
+          <span class="cc-title">${c.title}</span>
+        </div>
+        <div class="cc-diagram">${c.diagram}</div>
+        <p class="cc-desc">${c.desc}</p>
+      </div>`).join('')
+  }</div>`;
+}
+
+// ═══════════════════════════════════════════════════════════════════════════════
 //  SSD OVERLAY  — annotate empty cells with WeakC4 symbols
 // ═══════════════════════════════════════════════════════════════════════════════
 
@@ -778,6 +1184,8 @@ $('lesson-next').addEventListener('click', () => {
 //  INIT
 // ═══════════════════════════════════════════════════════════════════════════════
 
+buildTrainerTab();
+buildConceptsTab();
 initState();
 buildBoardDOM();
 suggestion = { col: 3, inBook: true };   // col 4 (1-indexed) = index 3
