@@ -321,6 +321,7 @@ let suggestion = null;
 let aiTimer = null;
 let sugTimer = null;
 let hintTimer = null;
+let takeBackState = null;
 
 function initState() {
   board = makeBoard();
@@ -330,6 +331,7 @@ function initState() {
   winner = null;
   winCells = null;
   suggestion = null;
+  takeBackState = null;
 }
 
 // ═══════════════════════════════════════════════════════════════════════════════
@@ -357,6 +359,9 @@ function buildBoardDOM() {
     col.setAttribute('tabindex', '0');
     col.setAttribute('role', 'button');
     col.setAttribute('aria-label', `Column ${c + 1}`);
+    const overlay = document.createElement('div');
+    overlay.className = 'hint-overlay';
+    col.appendChild(overlay);
     for (let r = ROWS-1; r >= 0; r--) {
       const cell = document.createElement('div');
       cell.className = 'cell'; cell.dataset.r = r; cell.dataset.c = c;
@@ -488,11 +493,13 @@ function handleHumanMove(col) {
 
   clearHintFlash();
   isAnimating = true;
+  const prevBoard = board;
+  const prevHistory = history;
   const row = dropRow(board, col);
 
   animateDrop(col, row, RED, () => {
-    board = placed(board, col, RED);
-    history += String(col + 1);
+    board = placed(prevBoard, col, RED);
+    history = prevHistory + String(col + 1);
 
     const win = checkWin(board);
     if (win) {
@@ -511,7 +518,16 @@ function handleHumanMove(col) {
     currentPlayer = YELLOW;
     suggestion = null;
     render(); updateStatus();
-    aiTimer = setTimeout(doAIMove, 420);
+
+    // Offer take-back when the move hands Yellow a near-forced win (depth-3 check).
+    const loseScore = minimax(board, 3, -Infinity, Infinity, false);
+    const isLosingMove = loseScore <= -9000;
+    if (isLosingMove) {
+      takeBackState = { board: prevBoard, history: prevHistory };
+      $('btn-takeback').hidden = false;
+    }
+
+    aiTimer = setTimeout(doAIMove, isLosingMove ? 2200 : 420);
   });
 }
 
@@ -521,6 +537,8 @@ function handleHumanMove(col) {
 
 function doAIMove() {
   if (gameOver || currentPlayer !== YELLOW) return;
+  $('btn-takeback').hidden = true;
+  takeBackState = null;
   isAnimating = true;
 
   let col = tacticalMove(board, YELLOW);
@@ -597,10 +615,27 @@ $('board').addEventListener('keydown', e => {
   if (c !== undefined) handleHumanMove(parseInt(c));
 });
 
+$('btn-takeback').addEventListener('click', () => {
+  if (!takeBackState) return;
+  if (aiTimer) { clearTimeout(aiTimer); aiTimer = null; }
+  $('btn-takeback').hidden = true;
+  board = takeBackState.board;
+  history = takeBackState.history;
+  takeBackState = null;
+  currentPlayer = RED;
+  isAnimating = false;
+  winCells = null; gameOver = false;
+  const bm = bookMove(history);
+  suggestion = (bm && canPlay(board, bm.col)) ? { col: bm.col, inBook: true } : computeSuggestion();
+  render(); updateStatus();
+  $('msg').textContent = ''; $('msg').className = '';
+});
+
 $('btn-new').addEventListener('click', () => {
   if (aiTimer)  clearTimeout(aiTimer);
   if (sugTimer) { clearTimeout(sugTimer); sugTimer = null; }
   clearHintFlash();
+  $('btn-takeback').hidden = true;
   isAnimating = false;
   initState();
   buildBoardDOM();
