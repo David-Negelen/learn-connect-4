@@ -1,6 +1,9 @@
 /* ── Reset & base ───────────────────────────────────────────────────────────── */
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
+/* Ensure [hidden] always wins over any display:flex ID rules */
+[hidden] { display: none !important; }
+
 :root {
   --cell: min(calc((100vw - 88px) / 7), 68px);
   --gap: 6px;
@@ -433,6 +436,17 @@ button:active {
   color: #70e890;
   border-color: rgba(93, 215, 122, 0.6);
   box-shadow: 0 12px 28px rgba(76, 199, 102, 0.15);
+}
+
+/* ── Focus visibility ───────────────────────────────────────────────────────── */
+:focus-visible {
+  outline: 2px solid var(--accent-purple);
+  outline-offset: 3px;
+}
+.col:focus-visible, .dcol:focus-visible {
+  outline: 2px solid rgba(99, 102, 241, 0.7);
+  outline-offset: 2px;
+  background: rgba(255, 255, 255, 0.08);
 }
 
 /* ── Tab bar ─────────────────────────────────────────────────────────────────── */

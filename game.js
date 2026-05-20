@@ -336,6 +336,9 @@ function buildBoardDOM() {
   for (let c = 0; c < COLS; c++) {
     const col = document.createElement('div');
     col.className = 'col'; col.dataset.c = c;
+    col.setAttribute('tabindex', '0');
+    col.setAttribute('role', 'button');
+    col.setAttribute('aria-label', `Column ${c + 1}`);
     for (let r = ROWS-1; r >= 0; r--) {
       const cell = document.createElement('div');
       cell.className = 'cell'; cell.dataset.r = r; cell.dataset.c = c;
@@ -563,6 +566,13 @@ $('board').addEventListener('touchend', e => {
   if (c !== undefined) handleHumanMove(parseInt(c));
 }, { passive: false });
 
+$('board').addEventListener('keydown', e => {
+  if (e.key !== 'Enter' && e.key !== ' ') return;
+  e.preventDefault();
+  const c = e.target.closest('.col')?.dataset?.c;
+  if (c !== undefined) handleHumanMove(parseInt(c));
+});
+
 $('btn-new').addEventListener('click', () => {
   if (aiTimer)  clearTimeout(aiTimer);
   if (sugTimer) { clearTimeout(sugTimer); sugTimer = null; }
@@ -690,6 +700,9 @@ function buildDrillBoard() {
   for (let c = 0; c < COLS; c++) {
     const col = document.createElement('div');
     col.className = 'dcol'; col.dataset.c = c;
+    col.setAttribute('tabindex', '0');
+    col.setAttribute('role', 'button');
+    col.setAttribute('aria-label', `Column ${c + 1}`);
     for (let r = ROWS - 1; r >= 0; r--) {
       const cell = document.createElement('div');
       cell.className = 'dc'; cell.dataset.r = r; cell.dataset.c = c;
@@ -895,6 +908,12 @@ function buildTrainerTab() {
 
   buildDrillBoard();
   document.getElementById('drill-board').addEventListener('click', e => {
+    const c = e.target.closest('.dcol')?.dataset?.c;
+    if (c !== undefined) submitDrillAnswer(parseInt(c));
+  });
+  document.getElementById('drill-board').addEventListener('keydown', e => {
+    if (e.key !== 'Enter' && e.key !== ' ') return;
+    e.preventDefault();
     const c = e.target.closest('.dcol')?.dataset?.c;
     if (c !== undefined) submitDrillAnswer(parseInt(c));
   });
