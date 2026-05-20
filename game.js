@@ -527,7 +527,7 @@ function handleHumanMove(col) {
       $('btn-takeback').hidden = false;
     }
 
-    aiTimer = setTimeout(doAIMove, isLosingMove ? 2200 : 420);
+    aiTimer = setTimeout(doAIMove, isLosingMove ? 4500 : 420);
   });
 }
 
