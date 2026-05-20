@@ -301,6 +301,7 @@ let board, history, currentPlayer, gameOver, winner, winCells;
 let isAnimating = false;
 let suggestion = null;
 let aiTimer = null;
+let sugTimer = null;
 let hintTimer = null;
 
 function initState() {
@@ -535,7 +536,8 @@ function doAIMove() {
     } else {
       suggestion = null;
       render(); updateStatus();   // shows "Thinking…" badge
-      setTimeout(() => {
+      sugTimer = setTimeout(() => {
+        sugTimer = null;
         suggestion = computeSuggestion();
         render(); updateStatus();
         isAnimating = false;
@@ -563,6 +565,7 @@ $('board').addEventListener('touchend', e => {
 
 $('btn-new').addEventListener('click', () => {
   if (aiTimer)  clearTimeout(aiTimer);
+  if (sugTimer) { clearTimeout(sugTimer); sugTimer = null; }
   clearHintFlash();
   isAnimating = false;
   initState();
@@ -613,7 +616,7 @@ document.querySelectorAll('.tab-btn').forEach(btn =>
 function loadProgress() {
   try { return JSON.parse(localStorage.getItem('wc4-progress') || '{}'); } catch { return {}; }
 }
-function saveProgress(data) { localStorage.setItem('wc4-progress', JSON.stringify(data)); }
+function saveProgress(data) { try { localStorage.setItem('wc4-progress', JSON.stringify(data)); } catch { /* storage unavailable */ } }
 function recordResult(hist, correct) {
   const p = loadProgress();
   if (!p[hist]) p[hist] = { a: 0, c: 0 };
