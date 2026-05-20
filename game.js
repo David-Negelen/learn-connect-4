@@ -266,6 +266,24 @@ function bestMove(b, player, depth=6) {
   return bestCol;
 }
 
+// Like bestMove but picks randomly among moves within `epsilon` of optimal.
+// Used for Yellow's opening to avoid identical games every time.
+function bestMoveVaried(b, player, depth, epsilon) {
+  const isMax = player === RED;
+  let bestScore = isMax ? -Infinity : Infinity;
+  const scores = [];
+  for (const c of COL_ORDER) {
+    if (!canPlay(b, c)) continue;
+    const score = minimax(placed(b, c, player), depth - 1, -Infinity, Infinity, !isMax);
+    scores.push({ c, score });
+    if (isMax ? score > bestScore : score < bestScore) bestScore = score;
+  }
+  const pool = scores.filter(({ score }) =>
+    isMax ? score >= bestScore - epsilon : score <= bestScore + epsilon
+  );
+  return pool[Math.floor(Math.random() * pool.length)].c;
+}
+
 // Immediate win or block (O(n) scan, no recursion)
 function tacticalMove(b, forPlayer) {
   for (const c of COL_ORDER) {
@@ -506,7 +524,13 @@ function doAIMove() {
   isAnimating = true;
 
   let col = tacticalMove(board, YELLOW);
-  if (col === -1) col = bestMove(board, YELLOW, 6);
+  if (col === -1) {
+    // First 3 Yellow moves: pick randomly among near-equal options (epsilon=4)
+    // so Yellow plays varied openings instead of the same line every game.
+    col = history.length < 6
+      ? bestMoveVaried(board, YELLOW, 6, 4)
+      : bestMove(board, YELLOW, 6);
+  }
 
   const row = dropRow(board, col);
   animateDrop(col, row, YELLOW, () => {
