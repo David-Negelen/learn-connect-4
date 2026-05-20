@@ -85,6 +85,124 @@ const BOOK = {
 
   // ── Hills — 452-branch (45 → Red=2) ────────────────────────────────────────
   "4524":     [4, "Hills Opening"],          // rep "452443"
+
+  // ── 47 Lines — depth 4 (Red's 3rd move) ────────────────────────────────────
+  "4744":     [4, "47 Lines — Crown"],
+  "4743":     [4, "47 Lines"],
+  "4742":     [3, "47 Lines — Hills"],
+  "4741":     [4, "47 Lines"],
+  "4745":     [2, "47 Lines — Hills"],
+  "4746":     [2, "47 Lines — 462"],
+
+  // ── Hills 41-branch — depth 4 ───────────────────────────────────────────────
+  "4144":     [4, "Hills Opening"],
+  "4143":     [6, "Hills Opening"],
+  "4141":     [4, "Hills Opening"],
+  "4142":     [3, "Hills Opening"],
+  "4145":     [2, "Hills Opening"],
+  "4146":     [2, "Hills Opening"],
+
+  // ── Hills 42-branch — depth 4 ───────────────────────────────────────────────
+  "4234":     [4, "Hills Opening"],
+  "4233":     [4, "Hills Opening"],
+  "4231":     [4, "Hills Opening"],
+  "4232":     [4, "Hills Opening"],
+  "4235":     [4, "Hills Opening"],
+  "4236":     [2, "Hills Opening"],
+
+  // ── D3-D4 Opening — depth 6 (4442 and 4441 branches) ───────────────────────
+  "444244":   [4, "D3-D4 Opening"],
+  "444243":   [6, "D3-D4 Opening"],
+  "444246":   [2, "D3-D4 Opening"],
+  "444241":   [4, "D3-D4 Opening"],
+  "444245":   [2, "D3-D4 Opening"],
+  "444242":   [3, "D3-D4 Opening"],
+  "444144":   [4, "D3-D4 Opening"],
+  "444143":   [6, "D3-D4 Opening"],
+  "444146":   [2, "D3-D4 Opening"],
+  "444141":   [4, "D3-D4 Opening"],
+  "444145":   [2, "D3-D4 Opening"],
+  "444142":   [3, "D3-D4 Opening"],
+
+  // ── Crown — 6-1 Line — depth 8 ──────────────────────────────────────────────
+  "44444454": [3, "Crown — 6-1 Line"],
+  "44444456": [3, "Crown — 6-1 Line"],
+  "44444451": [4, "Crown — 6-1 Line"],
+  "44444457": [3, "Crown — 6-1 Line"],
+  "44444452": [3, "Crown — 6-1 Line"],
+  "44444453": [4, "Crown — 6-1 Line"],
+
+  // ── Shoulder Spike — depth 8 ────────────────────────────────────────────────
+  "44444524": [2, "Shoulder Spike"],
+  "44444521": [2, "Shoulder Spike"],
+  "44444523": [4, "Shoulder Spike"],
+  "44444526": [2, "Shoulder Spike"],
+  "44444527": [4, "Shoulder Spike"],
+  "44444522": [4, "Shoulder Spike"],
+
+  // ── 3-2 / Hills Opening — depth 8 ───────────────────────────────────────────
+  "44444365": [5, "3-2 / Hills Opening"],
+  "44444364": [4, "3-2 / Hills Opening"],
+  "44444362": [2, "3-2 / Hills Opening"],
+  "44444361": [4, "3-2 / Hills Opening"],
+  "44444367": [3, "3-2 / Hills Opening"],
+  "44444363": [4, "3-2 / Hills Opening"],
+
+  // ── 4363 Lines — depth 6 ────────────────────────────────────────────────────
+  "436344":   [4, "4363 Lines"],
+  "436343":   [6, "4363 Lines"],
+  "436346":   [2, "4363 Lines"],
+  "436341":   [4, "4363 Lines"],
+  "436345":   [2, "4363 Lines"],
+  "436342":   [3, "4363 Lines"],
+
+  // ── Two-holes — depth 6 ─────────────────────────────────────────────────────
+  "436134":   [4, "Two-holes"],
+  "436136":   [4, "Two-holes"],
+  "436131":   [4, "Two-holes"],
+  "436135":   [2, "Two-holes"],
+  "436132":   [4, "Two-holes"],
+  "436137":   [4, "Two-holes"],
+
+  // ── Cup Opening — depth 6 ───────────────────────────────────────────────────
+  "462134":   [5, "Cup Opening"],
+  "462132":   [1, "Cup Opening"],
+  "462131":   [3, "Cup Opening"],
+  "462136":   [4, "Cup Opening"],
+  "462137":   [4, "Cup Opening"],
+
+  // ── Cup Opening — depth 8 ───────────────────────────────────────────────────
+  "46213524": [4, "Tall Cup Opening"],
+  "46213522": [6, "Short Cup Opening"],
+  "46213523": [5, "No Cup Opening"],
+  "46213526": [2, "Cup Opening"],
+  "46213521": [4, "Cup Opening"],
+
+  // ── Hills 4524-branch — depth 6 ─────────────────────────────────────────────
+  "452444":   [4, "Hills Opening"],
+  "452443":   [5, "Hills Opening"],
+  "452446":   [2, "Hills Opening"],
+  "452441":   [4, "Hills Opening"],
+  "452445":   [2, "Hills Opening"],
+  "452442":   [3, "Hills Opening"],
+
+  // ── Palm Variations — depth 10 ──────────────────────────────────────────────
+  "4365567664": [1, "Palm Variations"],
+  "4365567662": [1, "Palm Variations"],
+  "4365567661": [1, "Palm Variations"],
+  "4365567665": [3, "Palm Variations"],
+
+  // ── Fist Variations — depth 10 ──────────────────────────────────────────────
+  "4366755534": [5, "Fist Variations"],
+  "4366755537": [5, "Fist Variations"],
+  "4366755531": [4, "Fist Variations"],
+  "4366755536": [5, "Fist Variations"],
+
+  // ── Bent Two-bar — depth 10 ─────────────────────────────────────────────────
+  "4367616634": [6, "Bent Two-bar"],
+  "4367616637": [6, "Bent Two-bar"],
+  "4367616632": [6, "Bent Two-bar"],
+  "4367616635": [5, "Bent Two-bar"],
 };
 
 // ── Variation name — longest-prefix match ────────────────────────────────────
@@ -194,75 +312,125 @@ function isFull(b) {
 }
 
 // ═══════════════════════════════════════════════════════════════════════════════
-//  MINIMAX  (depth-6 alpha-beta, center-first column order)
+//  TRANSPOSITION TABLE
 // ═══════════════════════════════════════════════════════════════════════════════
 
-function scoreWin(w) {
-  const r = w.filter(x=>x===RED).length;
-  const y = w.filter(x=>x===YELLOW).length;
-  if (r && y) return 0;
-  if (r===4) return 100; if (r===3) return 5; if (r===2) return 2;
-  if (y===4) return -100; if (y===3) return -5; if (y===2) return -2;
-  return 0;
+const TT = new Map();
+const TT_MAX   = 300_000;
+const TT_EXACT = 0, TT_LOWER = 1, TT_UPPER = 2;
+
+function boardKey(b) {
+  return b.flat().join('');
 }
+
+// ═══════════════════════════════════════════════════════════════════════════════
+//  MINIMAX  (iterative deepening + transposition table, center-first order)
+// ═══════════════════════════════════════════════════════════════════════════════
+
+const COL_WEIGHTS = [1, 2, 3, 4, 3, 2, 1];
 
 function evalBoard(b) {
   let s = 0;
-  for (let r = 0; r < ROWS; r++) {
-    s += b[r][3]===RED ? 4 : b[r][3]===YELLOW ? -4 : 0;
-    s += (b[r][2]===RED||b[r][4]===RED) ? 1 : (b[r][2]===YELLOW||b[r][4]===YELLOW) ? -1 : 0;
-  }
-  for (let r=0;r<ROWS;r++)
-    for (let c=0;c<=COLS-4;c++)
-      s += scoreWin([b[r][c],b[r][c+1],b[r][c+2],b[r][c+3]]);
-  for (let c=0;c<COLS;c++)
-    for (let r=0;r<=ROWS-4;r++)
-      s += scoreWin([b[r][c],b[r+1][c],b[r+2][c],b[r+3][c]]);
-  for (let r=0;r<=ROWS-4;r++)
-    for (let c=0;c<=COLS-4;c++)
-      s += scoreWin([b[r][c],b[r+1][c+1],b[r+2][c+2],b[r+3][c+3]]);
-  for (let r=3;r<ROWS;r++)
-    for (let c=0;c<=COLS-4;c++)
-      s += scoreWin([b[r][c],b[r-1][c+1],b[r-2][c+2],b[r-3][c+3]]);
+  for (let r = 0; r < ROWS; r++)
+    for (let c = 0; c < COLS; c++) {
+      if (b[r][c] === RED)    s += COL_WEIGHTS[c];
+      if (b[r][c] === YELLOW) s -= COL_WEIGHTS[c];
+    }
+
+  const win4 = (cells, row) => {
+    const r = cells.filter(x => x === RED).length;
+    const y = cells.filter(x => x === YELLOW).length;
+    if (r && y) return 0;
+    let v = 0;
+    if      (r === 3) v =  15;
+    else if (r === 2) v =   4;
+    else if (y === 3) v = -15;
+    else if (y === 2) v =  -4;
+    else return 0;
+    // Odd rows (1,3,5 from bottom) favour Red; even rows (0,2,4) favour Yellow
+    if (v > 0 && row % 2 === 1) v = Math.round(v * 1.3);
+    if (v < 0 && row % 2 === 0) v = Math.round(v * 1.3);
+    return v;
+  };
+
+  for (let r = 0; r < ROWS; r++)
+    for (let c = 0; c <= COLS - 4; c++)
+      s += win4([b[r][c], b[r][c+1], b[r][c+2], b[r][c+3]], r);
+
+  for (let c = 0; c < COLS; c++)
+    for (let r = 0; r <= ROWS - 4; r++)
+      s += win4([b[r][c], b[r+1][c], b[r+2][c], b[r+3][c]], r + 3);
+
+  for (let r = 0; r <= ROWS - 4; r++)
+    for (let c = 0; c <= COLS - 4; c++)
+      s += win4([b[r][c], b[r+1][c+1], b[r+2][c+2], b[r+3][c+3]], r + 3);
+
+  for (let r = 3; r < ROWS; r++)
+    for (let c = 0; c <= COLS - 4; c++)
+      s += win4([b[r][c], b[r-1][c+1], b[r-2][c+2], b[r-3][c+3]], r - 3);
+
   return s;
 }
 
 function minimax(b, depth, alpha, beta, isMax) {
-  const win = checkWin(b);
-  if (win) return win.player===RED ? 10000+depth : -10000-depth;
-  if (isFull(b)||depth===0) return depth===0 ? evalBoard(b) : 0;
-  if (isMax) {
-    let best = -Infinity;
-    for (const c of COL_ORDER) {
-      if (!canPlay(b,c)) continue;
-      best = Math.max(best, minimax(placed(b,c,RED), depth-1, alpha, beta, false));
-      alpha = Math.max(alpha, best);
-      if (beta <= alpha) break;
-    }
-    return best;
-  } else {
-    let best = Infinity;
-    for (const c of COL_ORDER) {
-      if (!canPlay(b,c)) continue;
-      best = Math.min(best, minimax(placed(b,c,YELLOW), depth-1, alpha, beta, true));
-      beta = Math.min(beta, best);
-      if (beta <= alpha) break;
-    }
-    return best;
+  const origAlpha = alpha;
+  const origBeta  = beta;
+  const key = boardKey(b);
+
+  const tt = TT.get(key);
+  if (tt !== undefined && tt.depth >= depth) {
+    if (tt.flag === TT_EXACT) return tt.score;
+    if (tt.flag === TT_LOWER) alpha = Math.max(alpha, tt.score);
+    if (tt.flag === TT_UPPER) beta  = Math.min(beta,  tt.score);
+    if (alpha >= beta) return tt.score;
   }
+
+  const win = checkWin(b);
+  if (win) return win.player === RED ? 10000 + depth : -10000 - depth;
+  if (isFull(b) || depth === 0) return depth === 0 ? evalBoard(b) : 0;
+
+  let best = isMax ? -Infinity : Infinity;
+  for (const c of COL_ORDER) {
+    if (!canPlay(b, c)) continue;
+    const score = minimax(placed(b, c, isMax ? RED : YELLOW), depth - 1, alpha, beta, !isMax);
+    if (isMax) { if (score > best) best = score; alpha = Math.max(alpha, best); }
+    else        { if (score < best) best = score; beta  = Math.min(beta, best); }
+    if (beta <= alpha) break;
+  }
+
+  if (TT.size < TT_MAX) {
+    TT.set(key, {
+      score: best,
+      depth,
+      flag: best <= origAlpha ? TT_UPPER : best >= origBeta ? TT_LOWER : TT_EXACT,
+    });
+  }
+
+  return best;
 }
 
-function bestMove(b, player, depth=6) {
-  const isMax = player===RED;
-  let bestScore = isMax ? -Infinity : Infinity;
-  let bestCol = COL_ORDER.find(c => canPlay(b,c)) ?? 3;
-  for (const c of COL_ORDER) {
-    if (!canPlay(b,c)) continue;
-    const score = minimax(placed(b,c,player), depth-1, -Infinity, Infinity, !isMax);
-    if (isMax ? score > bestScore : score < bestScore) {
-      bestScore = score; bestCol = c;
+// Iterative deepening: runs depth 4→6→8→10, stops when time budget expires.
+// TT warm-up from shallower iterations significantly accelerates each deeper pass.
+function bestMoveID(b, player, timeBudget = 400) {
+  const isMax = player === RED;
+  let bestCol = COL_ORDER.find(c => canPlay(b, c)) ?? 3;
+  const start = Date.now();
+
+  for (let depth = 4; depth <= 10; depth += 2) {
+    if (Date.now() - start >= timeBudget) break;
+    let bestScore = isMax ? -Infinity : Infinity;
+    let depthBest = bestCol;
+
+    for (const c of COL_ORDER) {
+      if (!canPlay(b, c)) continue;
+      const score = minimax(placed(b, c, player), depth - 1, -Infinity, Infinity, !isMax);
+      if (isMax ? score > bestScore : score < bestScore) { bestScore = score; depthBest = c; }
     }
+
+    bestCol = depthBest;
+    if (Math.abs(bestScore) >= 9000) break; // forced result found
   }
+
   return bestCol;
 }
 
@@ -308,7 +476,7 @@ function computeSuggestion() {
   if (tac !== -1) return { col: tac, inBook: false, urgent: true };
   const bm = bookMove(history);
   if (bm && canPlay(board, bm.col)) return { col: bm.col, inBook: true };
-  return { col: bestMove(board, RED, 6), inBook: false };
+  return { col: bestMoveID(board, RED, 280), inBook: false };
 }
 
 // ═══════════════════════════════════════════════════════════════════════════════
@@ -321,7 +489,9 @@ let suggestion = null;
 let aiTimer = null;
 let sugTimer = null;
 let hintTimer = null;
+let hintReasonTimer = null;
 let takeBackState = null;
+let shownBookExitToast = false;
 
 function initState() {
   board = makeBoard();
@@ -332,6 +502,8 @@ function initState() {
   winCells = null;
   suggestion = null;
   takeBackState = null;
+  shownBookExitToast = false;
+  TT.clear();
 }
 
 // ═══════════════════════════════════════════════════════════════════════════════
@@ -519,8 +691,8 @@ function handleHumanMove(col) {
     suggestion = null;
     render(); updateStatus();
 
-    // Offer take-back when the move hands Yellow a near-forced win (depth-3 check).
-    const loseScore = minimax(board, 3, -Infinity, Infinity, false);
+    // Offer take-back when the move hands Yellow a near-forced win (depth-5 check).
+    const loseScore = minimax(board, 5, -Infinity, Infinity, false);
     const isLosingMove = loseScore <= -9000;
     if (isLosingMove) {
       takeBackState = { board: prevBoard, history: prevHistory };
@@ -543,11 +715,9 @@ function doAIMove() {
 
   let col = tacticalMove(board, YELLOW);
   if (col === -1) {
-    // First 3 Yellow moves: pick randomly among near-equal options (epsilon=4)
-    // so Yellow plays varied openings instead of the same line every game.
     col = history.length < 6
       ? bestMoveVaried(board, YELLOW, 6, 4)
-      : bestMove(board, YELLOW, 6);
+      : bestMoveID(board, YELLOW, 400);
   }
 
   const row = dropRow(board, col);
@@ -584,11 +754,31 @@ function doAIMove() {
       sugTimer = setTimeout(() => {
         sugTimer = null;
         suggestion = computeSuggestion();
+        if (suggestion && !suggestion.inBook && !shownBookExitToast) {
+          shownBookExitToast = true;
+          showToast('Left opening book — engine now in control');
+        }
         render(); updateStatus();
         isAnimating = false;
       }, 30);
     }
   });
+}
+
+// ═══════════════════════════════════════════════════════════════════════════════
+//  TOAST
+// ═══════════════════════════════════════════════════════════════════════════════
+
+function showToast(msg) {
+  const t = document.createElement('div');
+  t.className = 'toast';
+  t.textContent = msg;
+  document.getElementById('app').appendChild(t);
+  requestAnimationFrame(() => requestAnimationFrame(() => t.classList.add('toast-show')));
+  setTimeout(() => {
+    t.classList.remove('toast-show');
+    setTimeout(() => t.remove(), 400);
+  }, 3500);
 }
 
 // ═══════════════════════════════════════════════════════════════════════════════
@@ -634,8 +824,10 @@ $('btn-takeback').addEventListener('click', () => {
 $('btn-new').addEventListener('click', () => {
   if (aiTimer)  clearTimeout(aiTimer);
   if (sugTimer) { clearTimeout(sugTimer); sugTimer = null; }
+  if (hintReasonTimer) { clearTimeout(hintReasonTimer); hintReasonTimer = null; }
   clearHintFlash();
   $('btn-takeback').hidden = true;
+  $('hint-reason').hidden = true;
   isAnimating = false;
   initState();
   buildBoardDOM();
@@ -648,7 +840,6 @@ $('btn-new').addEventListener('click', () => {
 $('btn-hint').addEventListener('click', () => {
   if (gameOver || currentPlayer !== RED) return;
 
-  // Ensure suggestion is available (may need engine compute first time)
   if (!suggestion) suggestion = computeSuggestion();
   if (!suggestion) return;
 
@@ -657,13 +848,24 @@ $('btn-hint').addEventListener('click', () => {
   const colEl = document.querySelector(`.col[data-c="${suggestion.col}"]`);
   if (!colEl) return;
 
-  // Force reflow so the animation restarts cleanly if already active
   void colEl.offsetWidth;
   colEl.classList.add('hint-flash');
   hintTimer = setTimeout(() => {
     colEl.classList.remove('hint-flash');
     hintTimer = null;
   }, 1500);
+
+  // Show move reason beneath the board
+  const reasonEl = $('hint-reason');
+  if (reasonEl) {
+    reasonEl.textContent = getMoveReason(history, suggestion.col);
+    reasonEl.hidden = false;
+    if (hintReasonTimer) clearTimeout(hintReasonTimer);
+    hintReasonTimer = setTimeout(() => {
+      reasonEl.hidden = true;
+      hintReasonTimer = null;
+    }, 5000);
+  }
 });
 
 // ═══════════════════════════════════════════════════════════════════════════════
@@ -730,6 +932,12 @@ const MOVE_REASONS = {
   '4363':       "Column 4 is the book move keeping Red's threat network intact in the 4363 Lines.",
   '4621':       "Column 3 sets up the Cup Opening, targeting the miai pair on columns 2-4.",
   '4524':       "Column 4 maintains the Hills Opening structure after Yellow's early column-5 play.",
+  '47':         "Maintaining center dominance despite Yellow's edge play — the central structure is decisive regardless of Yellow's column-7 start.",
+  '41':         "Column 4 continues central control; Yellow's far-left play does not threaten Red's center-first strategy.",
+  '42':         "Column 3 begins a left-center structure that pairs with the column-4 piece for dual threats.",
+  '4744':       "Deepening the center — Yellow's re-centering accelerates the Crown clash but Red's first-mover advantage in col 4 holds.",
+  '4144':       "Maintaining the Crown stack; Yellow centering after a far-left opening accelerates Red's dominant center structure.",
+  '4234':       "Column 4 reclaims center control after Yellow's centering reply, building the decisive column-3-4 duo.",
 };
 
 function getMoveReason(hist, col) {
