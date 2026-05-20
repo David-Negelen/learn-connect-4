@@ -782,6 +782,9 @@ function submitDrillAnswer(col) {
     document.querySelectorAll('.dcn')[pos.col].classList.add('drill-answer-num');
   }
 
+  document.getElementById('drill-progress-text').textContent =
+    `Card ${drillIdx + 1} of ${drillQueue.length} · Session: ${drillCorrect}/${drillIdx + 1} correct`;
+
   const fb = document.getElementById('drill-feedback');
   fb.hidden = false;
   fb.className = right ? 'correct' : 'wrong';
